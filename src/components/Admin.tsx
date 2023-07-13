@@ -1,5 +1,4 @@
 import { Box } from "@mui/material";
-import maggie from '../Images/maggie.jpeg'
 
 
 const Page: React.FC = () => { 
@@ -10,8 +9,7 @@ const Page: React.FC = () => {
             alignItems: 'center'
       
           }}>
-            <h1>Welcome to the Maggie Zone</h1>
-            <img src={maggie} alt='a dog'/>
+            <h1>Private</h1>
           </Box>
         )
 };
