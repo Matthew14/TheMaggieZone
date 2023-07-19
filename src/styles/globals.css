@@ -30,4 +30,5 @@ body {
     hsl(312deg 64% 29%) 89%,
     hsl(317deg 78% 27%) 100%
     );
+    height: 100vh;
 }
