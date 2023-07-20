@@ -1,4 +1,4 @@
-import { ImageList, ImageListItem, Modal } from "@mui/material";
+import { ImageList, ImageListItem, ImageListItemBar, Modal } from "@mui/material";
 import maggie from "../../public/Images/maggie.jpeg";
 import sadMaggie from "../../public/Images/sad_maggie.jpeg";
 import shoe from "../../public/Images/shoe.jpeg";
@@ -12,17 +12,18 @@ import Image from "next/image";
 import { useState } from "react";
 const Page: React.FC = () => {
   const itemData = [
+    { title: "Maggie", img: maggie },
     { title: "Sad Maggie", img: sadMaggie },
     { title: "Shoe Maggie", img: shoe },
     { title: "Stair Maggie", img: stair },
     { title: "Toy Maggie", img: toy },
     { title: "Slipper Maggie", img: slipper },
     { title: "Angry Maggie", img: angry },
-    { title: "Seatbelt Maggie", img: seatbelt },
+    { title: "Seatbelt Maggie", img: seatbelt }
   ];
 
   const [open, setOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(itemData[0])
+  const [selectedImage, setSelectedImage] = useState(itemData[0]);
 
   return (
     <>
@@ -42,16 +43,16 @@ const Page: React.FC = () => {
           </div>
         </div>
 
-        <ImageList className="my-10" variant="masonry" cols={3} gap={10}>
+        <ImageList className="my-10" variant="masonry" cols={3} gap={5}>
           {itemData.map((item) => (
             <ImageListItem
               key={item.img.src}
               onClick={() => {
-                setOpen(true)
-                setSelectedImage(item)
+                setOpen(true);
+                setSelectedImage(item);
               }}
             >
-              <Image src={item.img} alt={item.title} loading="lazy" />
+              <Image className='cursor-pointer' src={item.img} alt={item.title} loading="lazy" />
             </ImageListItem>
           ))}
         </ImageList>
@@ -59,12 +60,18 @@ const Page: React.FC = () => {
 
       <Modal
         open={open}
-        style={{display:'flex',alignItems:'center',justifyContent:'center'}}
-        onClose={()=>{setOpen(false)}}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+        onClose={() => {
+          setOpen(false);
+        }}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Image src={selectedImage.img} alt={selectedImage.title} />
+        <Image src={selectedImage.img} alt={selectedImage.title} height={500} width={500} />
       </Modal>
     </>
   );
