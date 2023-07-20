@@ -1,6 +1,7 @@
 import Image from "next/image";
 import sad_maggie from "../../public/Images/sad_maggie.jpeg";
-export default function Custom404() {
+
+const PageNotFound: React.FC = () => {
   return (
     <div className="flex items-center justify-center">
       <div>
@@ -16,3 +17,5 @@ export default function Custom404() {
     </div>
   );
 }
+
+export default PageNotFound;
