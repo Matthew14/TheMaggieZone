@@ -13,7 +13,7 @@
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.14.1",
-    "@types/node": "20.4.4",
+    "@types/node": "20.4.6",
     "@types/react": "18.2.15",
     "@types/react-dom": "18.2.7",
     "@vercel/analytics": "^1.0.1",
