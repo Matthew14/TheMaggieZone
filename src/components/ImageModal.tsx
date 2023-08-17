@@ -22,7 +22,7 @@ const ImageModal: FC<ImageModalProps> = ({ image, open, onClose }) => {
       aria-labelledby='modal-modal-title'
       aria-describedby='modal-modal-description'
     >
-      <Image src={image.img} alt={image.title} height={500} width={500} />
+      <Image src={image.img} alt={image.title} height={1200} width={1200} />
     </Modal>
   );
 };
