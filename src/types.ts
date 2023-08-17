@@ -1,7 +1,7 @@
 import { StaticImageData } from "next/image"
 
 export type imageWithTitle = {
-  img: StaticImageData;
+  img: string;
   title: string;
 };
 

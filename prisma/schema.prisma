@@ -29,3 +29,9 @@ model Weight {
   userId     Int   @unique
   amountInKg Float
 }
+
+model Image {
+  id         Int   @id @default(autoincrement())
+  title String
+  path String
+}
