@@ -11,7 +11,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -28,6 +27,7 @@ jobs:
         cache: 'npm'
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    - run: echo DATABASE_URL="$DATABASE_URL" >> .env
     - run: npm ci
     - run: npm run build --if-present
     # - run: npm test
