@@ -1,16 +1,30 @@
 import { Inter } from "next/font/google";
 
 import MaggieImageList from "@/components/MaggieImageList";
-import { PrismaClient } from "@prisma/client";
+import { S3Client, paginateListObjectsV2 } from "@aws-sdk/client-s3";
 
 const inter = Inter({ subsets: ["latin"] });
-
+const bucket = 'the-maggie-zone-images' 
 const Page: React.FC = async () => {
-    const prisma = new PrismaClient();
 
+    const s3Client = new S3Client({ region: 'eu-west-1', });
+    const s3Url = `https://${bucket}.s3.eu-west-1.amazonaws.com`
+    const paginator = paginateListObjectsV2(
+        { client: s3Client },
+        { Bucket: bucket }
+      );
+      const getImages = async () => {
+      for await (const page of paginator) {
+        const objects = page.Contents;
+        if (objects) {
+          return objects.map((o) => { return {title: o.Key!, img: `${s3Url}/${o.Key}`}})
+        }
+    }   
+    }
 
-    const imagesData = await prisma.image.findMany();
-    return (
+    const imagesData = await getImages();
+    return imagesData && (
+
         <main className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`} >
         <div>
             <div className='flex mx-auto'>
@@ -20,7 +34,7 @@ const Page: React.FC = async () => {
                 </h1>
             </div>
             </div>
-            <MaggieImageList images={imagesData.map(img => {return {img: img.path.replace('public/', '/Images/'), title: img.title}})} />
+            <MaggieImageList images={imagesData} />
         </div>
         </main>
     );
