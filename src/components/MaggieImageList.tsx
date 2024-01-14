@@ -14,7 +14,6 @@ interface MaggieImageListProps {
 const MaggieImageList: FC<MaggieImageListProps> = ({ images }) => {
   const [open, setOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(images[0]);
-  console.log(images)
   return (
     <>
       <ImageList className='my-10' variant='masonry' cols={3} gap={5}>
