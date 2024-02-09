@@ -32,3 +32,10 @@ body {
     );
     height: 100%
 }
+
+.authButton {
+    padding-bottom: 1rem;
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+}
