@@ -18,7 +18,7 @@ CREATE TABLE "ApplicationUser" (
     "lastName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "isAdmin" BOOLEAN NOT NULL DEFAULT false,
-    "password" TEXT NOT NULL DEFAULT '',
+    "password" TEXT NOT NULL,
 
     CONSTRAINT "ApplicationUser_pkey" PRIMARY KEY ("id")
 );
