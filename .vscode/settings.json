@@ -9,6 +9,15 @@
             "name": "MaggieDevDB",
             "database": "MaggieDB",
             "username": "matthew"
+        },
+        {
+            "previewLimit": 50,
+            "server": "home.matthewoneill.com",
+            "port": 7000,
+            "driver": "PostgreSQL",
+            "name": "StageDB",
+            "database": "MaggieDB_STAGE",
+            "username": "maggie"
         }
     ]
 }
