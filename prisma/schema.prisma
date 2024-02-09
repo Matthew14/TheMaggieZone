@@ -13,19 +13,20 @@ model Post {
   date  DateTime @default(now())
 }
 
-model User {
+model ApplicationUser {
   id        Int     @id @default(autoincrement())
   username  String  @unique
   firstName String
   lastName  String
   email     String  @unique
   isAdmin   Boolean @default(false)
+  password  String
   weights Weight[]
 }
 
 model Weight {
   id         Int   @id @default(autoincrement())
-  addedBy    User  @relation(fields: [userId], references: [id])
+  addedBy    ApplicationUser  @relation(fields: [userId], references: [id])
   userId     Int
   amountInKg Float
 }
