@@ -17,7 +17,7 @@
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.14.10",
-    "@prisma/client": "^5.9.1",
+    "@prisma/client": "^5.11.0",
     "@types/bcrypt": "^5.0.2",
     "@types/react": "18.2.47",
     "@types/react-dom": "18.2.19",
