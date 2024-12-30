@@ -40,7 +40,7 @@
     "bcrypt": "^5.1.1",
     "eslint": "^8.0.0",
     "eslint-config-next": "^15.1.2",
-    "prisma": "^5.13.0",
+    "prisma": "^6.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
   }
