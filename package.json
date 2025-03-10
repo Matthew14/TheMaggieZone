@@ -24,7 +24,7 @@
     "@types/react-dom": "19.0.3",
     "@vercel/analytics": "^1.4.1",
     "@vercel/speed-insights": "^1.1.0",
-    "autoprefixer": "10.4.20",
+    "autoprefixer": "10.4.21",
     "next": "^15.1.6",
     "next-auth": "^4.24.11",
     "postcss": "8.5.3",
