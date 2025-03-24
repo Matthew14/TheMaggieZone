@@ -20,7 +20,7 @@
     "@prisma/client": "^6.2.1",
     "@tailwindcss/postcss": "^4.0.9",
     "@types/bcrypt": "^5.0.2",
-    "@types/react": "19.0.8",
+    "@types/react": "19.0.12",
     "@types/react-dom": "19.0.3",
     "@vercel/analytics": "^1.4.1",
     "@vercel/speed-insights": "^1.1.0",
