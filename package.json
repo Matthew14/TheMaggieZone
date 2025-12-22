@@ -39,7 +39,7 @@
     "@types/underscore": "^1.13.0",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "bcrypt": "^6.0.0",
-    "eslint": "^9.20.1",
+    "eslint": "^9.39.2",
     "eslint-config-next": "^15.5.2",
     "prisma": "^6.15.0",
     "ts-node": "^10.9.2",
