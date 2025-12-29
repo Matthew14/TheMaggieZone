@@ -18,7 +18,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.4",
     "@prisma/client": "^6.2.1",
-    "@tailwindcss/postcss": "^4.1.14",
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/bcrypt": "^6.0.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "19.1.1",
