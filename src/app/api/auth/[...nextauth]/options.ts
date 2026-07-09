@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { compare } from 'bcrypt';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -20,8 +20,6 @@ export const options: NextAuthOptions = {
                 }
             },
             async authorize(credentials) {
-                const prisma = new PrismaClient()
-
                 if (!credentials?.password || !credentials.username) {
                     return null;
                 }
