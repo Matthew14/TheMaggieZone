@@ -5,9 +5,17 @@ import { S3Client, paginateListObjectsV2 } from "@aws-sdk/client-s3";
 import { LoginButton, LogoutButton } from "./components/Buttons";
 import { getServerSession } from "next-auth";
 import { options } from "./api/auth/[...nextauth]/options";
-import _ from 'underscore';
 
 const NUM_IMAGES = 10;
+
+const shuffle = <T,>(items: T[]): T[] => {
+    const result = [...items];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+};
 const inter = Inter({ subsets: ["latin"] });
 const bucket = 'the-maggie-zone-images'
 
@@ -23,7 +31,7 @@ const Page: React.FC = async () => {
         for await (const page of paginator) {
             const objects = page.Contents;
             if (objects) {
-                return _.shuffle(objects).slice(1, howMany).map((o) => { return { title: o.Key!, img: `${s3Url}/${o.Key}` } })
+                return shuffle(objects).slice(1, howMany).map((o) => { return { title: o.Key!, img: `${s3Url}/${o.Key}` } })
             }
         }
     }
