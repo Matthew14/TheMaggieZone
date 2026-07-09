@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import { unstable_cache } from "next/cache";
 
 import MaggieImageList from "@/components/MaggieImageList";
 import { S3Client, paginateListObjectsV2 } from "@aws-sdk/client-s3";
@@ -18,33 +19,42 @@ const shuffle = <T,>(items: T[]): T[] => {
 };
 const inter = Inter({ subsets: ["latin"] });
 const bucket = 'the-maggie-zone-images'
+const s3Url = `https://${bucket}.s3.eu-west-1.amazonaws.com`
+
+// The bucket policy grants public ListBucket/GetObject, so requests are
+// sent unsigned and the app needs no AWS credentials.
+const s3Client = new S3Client({
+    region: 'eu-west-1',
+    signer: { sign: async (request) => request },
+    credentials: { accessKeyId: '', secretAccessKey: '' },
+});
+
+const listImageKeys = unstable_cache(
+    async (): Promise<string[]> => {
+        const paginator = paginateListObjectsV2(
+            { client: s3Client },
+            { Bucket: bucket }
+        );
+        const keys: string[] = [];
+        for await (const page of paginator) {
+            for (const object of page.Contents ?? []) {
+                if (object.Key) {
+                    keys.push(object.Key);
+                }
+            }
+        }
+        return keys;
+    },
+    ['s3-image-keys'],
+    { revalidate: 3600 }
+);
 
 const Page: React.FC = async () => {
 
-    // The bucket policy grants public ListBucket/GetObject, so requests are
-    // sent unsigned and the app needs no AWS credentials.
-    const s3Client = new S3Client({
-        region: 'eu-west-1',
-        signer: { sign: async (request) => request },
-        credentials: { accessKeyId: '', secretAccessKey: '' },
-    });
-    const s3Url = `https://${bucket}.s3.eu-west-1.amazonaws.com`
-    const paginator = paginateListObjectsV2(
-        { client: s3Client },
-        { Bucket: bucket }
-    );
-    const getImages = async (howMany: number) => {
-        for await (const page of paginator) {
-            const objects = page.Contents;
-            if (objects) {
-                return shuffle(objects).slice(1, howMany).map((o) => { return { title: o.Key!, img: `${s3Url}/${o.Key}` } })
-            }
-        }
-    }
-
-    const imagesData = await getImages(NUM_IMAGES);
+    const keys = await listImageKeys();
+    const imagesData = shuffle(keys).slice(1, NUM_IMAGES).map((key) => { return { title: key, img: `${s3Url}/${key}` } });
     const session = await getServerSession(options);
-    return imagesData && (
+    return imagesData.length > 0 && (
 
         <main className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`} >
             <div>
