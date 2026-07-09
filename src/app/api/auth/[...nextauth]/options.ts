@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { clearFailures, isRateLimited, recordFailure } from '@/lib/rateLimit';
 import { compare } from 'bcrypt';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -19,8 +20,13 @@ export const options: NextAuthOptions = {
                     placeholder: 'PWizzle'
                 }
             },
-            async authorize(credentials) {
+            async authorize(credentials, req) {
                 if (!credentials?.password || !credentials.username) {
+                    return null;
+                }
+                const forwardedFor = req.headers?.['x-forwarded-for'];
+                const ip = (Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor)?.split(',')[0]?.trim() ?? 'unknown';
+                if (isRateLimited(ip)) {
                     return null;
                 }
                 const user = await prisma.applicationUser.findUnique({
@@ -28,6 +34,7 @@ export const options: NextAuthOptions = {
                 })
 
                 if (!user) {
+                    recordFailure(ip);
                     return null;
                 }
                 const isPasswordValid = await compare(
@@ -35,8 +42,10 @@ export const options: NextAuthOptions = {
                     user.password
                 )
                 if (!isPasswordValid) {
+                    recordFailure(ip);
                     return null
                 }
+                clearFailures(ip);
 
                 return {
                     id: user.id + '',
