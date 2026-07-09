@@ -21,7 +21,13 @@ const bucket = 'the-maggie-zone-images'
 
 const Page: React.FC = async () => {
 
-    const s3Client = new S3Client({ region: 'eu-west-1', });
+    // The bucket policy grants public ListBucket/GetObject, so requests are
+    // sent unsigned and the app needs no AWS credentials.
+    const s3Client = new S3Client({
+        region: 'eu-west-1',
+        signer: { sign: async (request) => request },
+        credentials: { accessKeyId: '', secretAccessKey: '' },
+    });
     const s3Url = `https://${bucket}.s3.eu-west-1.amazonaws.com`
     const paginator = paginateListObjectsV2(
         { client: s3Client },
