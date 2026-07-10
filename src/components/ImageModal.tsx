@@ -44,6 +44,7 @@ const ImageModal: FC<ImageModalProps> = ({ image, onClose }) => {
           alt={image.title}
           width={image.width}
           height={image.height}
+          sizes='90vw'
           placeholder='blur'
           blurDataURL={image.blurDataURL}
           className='max-h-[90vh] max-w-[90vw] w-auto h-auto'

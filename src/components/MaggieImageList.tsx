@@ -30,6 +30,7 @@ const MaggieImageList: FC<MaggieImageListProps> = ({ images }) => {
                 loading='lazy'
                 width={item.width}
                 height={item.height}
+                sizes='33vw'
                 placeholder='blur'
                 blurDataURL={item.blurDataURL}
               />
