@@ -28,8 +28,10 @@ const MaggieImageList: FC<MaggieImageListProps> = ({ images }) => {
                 src={item.img}
                 alt={item.title}
                 loading='lazy'
-                width={1000}
-                height={1000}
+                width={item.width}
+                height={item.height}
+                placeholder='blur'
+                blurDataURL={item.blurDataURL}
               />
             </button>
           </li>
