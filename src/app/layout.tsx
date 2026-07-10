@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+import { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import '../styles/globals.css'
@@ -6,7 +6,10 @@ import '../styles/globals.css'
 export const metadata: Metadata = {
   title: 'Welcome to the Maggie.Zone',
   description: 'A website for my dog',
-  themeColor: '#723d8f'
+}
+
+export const viewport: Viewport = {
+  themeColor: '#723d8f',
 }
 
 export default function RootLayout({
