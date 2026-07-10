@@ -31,22 +31,27 @@ const s3Client = new S3Client({
 
 const listImageKeys = unstable_cache(
     async (): Promise<string[]> => {
-        const paginator = paginateListObjectsV2(
-            { client: s3Client },
-            { Bucket: bucket }
-        );
-        const keys: string[] = [];
-        for await (const page of paginator) {
-            for (const object of page.Contents ?? []) {
-                if (object.Key) {
-                    keys.push(object.Key);
+        try {
+            const paginator = paginateListObjectsV2(
+                { client: s3Client },
+                { Bucket: bucket }
+            );
+            const keys: string[] = [];
+            for await (const page of paginator) {
+                for (const object of page.Contents ?? []) {
+                    if (object.Key) {
+                        keys.push(object.Key);
+                    }
                 }
             }
+            return keys;
+        } catch (error) {
+            console.error('Failed to list gallery images', error);
+            return [];
         }
-        return keys;
     },
     ['s3-image-keys'],
-    { revalidate: 3600 }
+    { revalidate: 3600, tags: ['s3-image-keys'] }
 );
 
 const Page: React.FC = async () => {
