@@ -1,29 +1,52 @@
+"use client";
+
 import { imageWithTitle } from "@/types";
-import { Modal } from "@mui/material";
 import Image from "next/image";
-import { FC } from "react";
+import { FC, useEffect, useRef } from "react";
 
 interface ImageModalProps {
-  image: imageWithTitle;
-  open: boolean;
+  image: imageWithTitle | null;
   onClose: () => void;
 }
 
-const ImageModal: FC<ImageModalProps> = ({ image, open, onClose }) => {
+const ImageModal: FC<ImageModalProps> = ({ image, onClose }) => {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      return;
+    }
+    if (image && !dialog.open) {
+      dialog.showModal();
+    } else if (!image && dialog.open) {
+      dialog.close();
+    }
+  }, [image]);
+
   return (
-    <Modal
-      open={open}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+    <dialog
+      ref={dialogRef}
       onClose={onClose}
-      aria-labelledby='modal-modal-title'
-      aria-describedby='modal-modal-description'
+      // Clicks on the backdrop hit the dialog element itself; clicks on the
+      // image hit the img, so only backdrop clicks close.
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          dialogRef.current?.close();
+        }
+      }}
+      className='m-auto bg-transparent p-0 backdrop:bg-black/70'
     >
-      <Image src={image.img} alt={image.title} height={1200} width={1200} />
-    </Modal>
+      {image && (
+        <Image
+          src={image.img}
+          alt={image.title}
+          height={1200}
+          width={1200}
+          className='max-h-[90vh] max-w-[90vw] w-auto h-auto'
+        />
+      )}
+    </dialog>
   );
 };
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { FC, useState } from "react";
-import { ImageList, ImageListItem } from "@mui/material";
 import Image from "next/image";
 import { imageWithTitle } from "@/types";
 import ImageModal from "./ImageModal";
@@ -12,32 +11,29 @@ interface MaggieImageListProps {
 }
 
 const MaggieImageList: FC<MaggieImageListProps> = ({ images }) => {
-  const [open, setOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(images[0]);
+  const [selectedImage, setSelectedImage] = useState<imageWithTitle | null>(null);
   return (
     <>
-      <ImageList className='my-10' variant='masonry' cols={3} gap={5}>
+      <ul className='my-10 columns-3 gap-[5px] list-none p-0'>
         {images.map((item) => (
-          <ImageListItem
+          <li
             key={item.img}
-            onClick={() => {
-              setOpen(true);
-              setSelectedImage(item);
-            }}
+            className='mb-[5px] break-inside-avoid'
+            onClick={() => setSelectedImage(item)}
           >
             <Image
-              className='cursor-pointer'
+              className='cursor-pointer w-full h-auto'
               src={item.img}
               alt={item.title}
               loading='lazy'
               width={1000}
               height={1000}
             />
-          </ImageListItem>
+          </li>
         ))}
-      </ImageList>
+      </ul>
 
-      <ImageModal image={selectedImage} open={open} onClose={() => setOpen(false)}/>
+      <ImageModal image={selectedImage} onClose={() => setSelectedImage(null)} />
 
     </>
   );
