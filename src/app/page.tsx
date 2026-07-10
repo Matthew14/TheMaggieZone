@@ -6,8 +6,11 @@ import { S3Client, paginateListObjectsV2 } from "@aws-sdk/client-s3";
 import { LoginButton, LogoutButton } from "./components/Buttons";
 import { getServerSession } from "next-auth";
 import { options } from "./api/auth/[...nextauth]/options";
+import { imageWithTitle } from "@/types";
+import sharp from "sharp";
 
 const NUM_IMAGES = 10;
+const BLUR_WIDTH = 16;
 
 const shuffle = <T,>(items: T[]): T[] => {
     const result = [...items];
@@ -49,6 +52,36 @@ const listImageKeys = unstable_cache(
     { revalidate: 3600, tags: ['s3-image-keys'] }
 );
 
+// Measures a photo's real dimensions and builds a blur placeholder.
+// Photos are immutable (a new photo gets a new key), so entries are
+// cached without revalidation; each image is downloaded at most once
+// per deployment.
+const measureImage = (key: string) =>
+    unstable_cache(
+        async () => {
+            const response = await fetch(`${s3Url}/${encodeURI(key)}`);
+            if (!response.ok) {
+                throw new Error(`Fetching ${key} failed: ${response.status}`);
+            }
+            const image = sharp(Buffer.from(await response.arrayBuffer()));
+            const { width, height, orientation } = await image.metadata();
+            if (!width || !height) {
+                throw new Error(`Could not read dimensions of ${key}`);
+            }
+            // EXIF orientations 5-8 display rotated 90°, swapping the axes;
+            // .rotate() bakes the same rotation into the placeholder.
+            const displaysRotated = (orientation ?? 1) >= 5;
+            const blur = await image.rotate().resize(BLUR_WIDTH).jpeg({ quality: 60 }).toBuffer();
+            return {
+                width: displaysRotated ? height : width,
+                height: displaysRotated ? width : height,
+                blurDataURL: `data:image/jpeg;base64,${blur.toString('base64')}`,
+            };
+        },
+        ['image-meta', key],
+        { revalidate: false }
+    )();
+
 const Page: React.FC = async () => {
 
     // Catch here rather than inside listImageKeys: unstable_cache doesn't
@@ -58,7 +91,17 @@ const Page: React.FC = async () => {
         console.error('Failed to list gallery images', error);
         return [] as string[];
     });
-    const imagesData = shuffle(keys).slice(0, NUM_IMAGES).map((key) => { return { title: key, img: `${s3Url}/${key}` } });
+    const imagesData = (await Promise.all(
+        shuffle(keys).slice(0, NUM_IMAGES).map(async (key): Promise<imageWithTitle | null> => {
+            try {
+                const meta = await measureImage(key);
+                return { title: key, img: `${s3Url}/${key}`, ...meta };
+            } catch (error) {
+                console.error(`Failed to measure gallery image ${key}`, error);
+                return null;
+            }
+        })
+    )).filter((image): image is imageWithTitle => image !== null);
     const session = await getServerSession(options);
     return imagesData.length > 0 && (
 
