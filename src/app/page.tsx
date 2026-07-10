@@ -109,7 +109,7 @@ const Page: React.FC = async () => {
     const session = await getServerSession(options);
     return imagesData.length > 0 && (
 
-        <main className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`} >
+        <main className={`flex min-h-screen flex-col items-center justify-between p-6 md:p-24 ${inter.className}`} >
             <div>
                 <div className="authButton">
                     {session ? <LogoutButton /> : <LoginButton /> }
