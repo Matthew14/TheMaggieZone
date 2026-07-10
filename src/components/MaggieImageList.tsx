@@ -14,9 +14,9 @@ const MaggieImageList: FC<MaggieImageListProps> = ({ images }) => {
   const [selectedImage, setSelectedImage] = useState<imageWithTitle | null>(null);
   return (
     <>
-      <ul className='my-10 columns-3 gap-[5px] list-none p-0'>
+      <ul className='my-10 columns-2 md:columns-3 lg:columns-4 gap-2 list-none p-0'>
         {images.map((item) => (
-          <li key={item.img} className='mb-[5px] break-inside-avoid'>
+          <li key={item.img} className='mb-2 break-inside-avoid'>
             <button
               type='button'
               className='block w-full cursor-pointer border-0 bg-transparent p-0'
@@ -24,13 +24,13 @@ const MaggieImageList: FC<MaggieImageListProps> = ({ images }) => {
               aria-label={`View ${item.title}`}
             >
               <Image
-                className='w-full h-auto'
+                className='w-full h-auto rounded-lg transition duration-200 hover:scale-[1.02] hover:shadow-lg'
                 src={item.img}
                 alt={item.title}
                 loading='lazy'
                 width={item.width}
                 height={item.height}
-                sizes='33vw'
+                sizes='(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw'
                 placeholder='blur'
                 blurDataURL={item.blurDataURL}
               />
