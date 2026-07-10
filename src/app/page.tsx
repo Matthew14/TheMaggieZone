@@ -31,24 +31,19 @@ const s3Client = new S3Client({
 
 const listImageKeys = unstable_cache(
     async (): Promise<string[]> => {
-        try {
-            const paginator = paginateListObjectsV2(
-                { client: s3Client },
-                { Bucket: bucket }
-            );
-            const keys: string[] = [];
-            for await (const page of paginator) {
-                for (const object of page.Contents ?? []) {
-                    if (object.Key) {
-                        keys.push(object.Key);
-                    }
+        const paginator = paginateListObjectsV2(
+            { client: s3Client },
+            { Bucket: bucket }
+        );
+        const keys: string[] = [];
+        for await (const page of paginator) {
+            for (const object of page.Contents ?? []) {
+                if (object.Key) {
+                    keys.push(object.Key);
                 }
             }
-            return keys;
-        } catch (error) {
-            console.error('Failed to list gallery images', error);
-            return [];
         }
+        return keys;
     },
     ['s3-image-keys'],
     { revalidate: 3600, tags: ['s3-image-keys'] }
@@ -56,7 +51,13 @@ const listImageKeys = unstable_cache(
 
 const Page: React.FC = async () => {
 
-    const keys = await listImageKeys();
+    // Catch here rather than inside listImageKeys: unstable_cache doesn't
+    // cache rejections, so a transient S3 failure renders without the
+    // gallery once instead of caching an empty list for an hour.
+    const keys = await listImageKeys().catch((error) => {
+        console.error('Failed to list gallery images', error);
+        return [] as string[];
+    });
     const imagesData = shuffle(keys).slice(1, NUM_IMAGES).map((key) => { return { title: key, img: `${s3Url}/${key}` } });
     const session = await getServerSession(options);
     return imagesData.length > 0 && (
