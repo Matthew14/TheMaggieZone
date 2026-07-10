@@ -35,6 +35,7 @@ const ImageModal: FC<ImageModalProps> = ({ image, onClose }) => {
           dialogRef.current?.close();
         }
       }}
+      aria-label={image?.title}
       className='m-auto bg-transparent p-0 backdrop:bg-black/70'
     >
       {image && (
