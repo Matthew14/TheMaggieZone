@@ -59,7 +59,11 @@ const listImageKeys = unstable_cache(
 const measureImage = (key: string) =>
     unstable_cache(
         async () => {
-            const response = await fetch(`${s3Url}/${encodeURI(key)}`);
+            // Fail fast on a stalled connection so the photo is dropped from
+            // the render instead of hanging the whole page.
+            const response = await fetch(`${s3Url}/${encodeURI(key)}`, {
+                signal: AbortSignal.timeout(10_000),
+            });
             if (!response.ok) {
                 throw new Error(`Fetching ${key} failed: ${response.status}`);
             }
@@ -95,7 +99,7 @@ const Page: React.FC = async () => {
         shuffle(keys).slice(0, NUM_IMAGES).map(async (key): Promise<imageWithTitle | null> => {
             try {
                 const meta = await measureImage(key);
-                return { title: key, img: `${s3Url}/${key}`, ...meta };
+                return { title: key, img: `${s3Url}/${encodeURI(key)}`, ...meta };
             } catch (error) {
                 console.error(`Failed to measure gallery image ${key}`, error);
                 return null;
