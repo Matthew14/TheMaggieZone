@@ -38,7 +38,7 @@ const listImageKeys = unstable_cache(
         const keys: string[] = [];
         for await (const page of paginator) {
             for (const object of page.Contents ?? []) {
-                if (object.Key) {
+                if (object.Key && !object.Key.endsWith('/')) {
                     keys.push(object.Key);
                 }
             }
@@ -58,7 +58,7 @@ const Page: React.FC = async () => {
         console.error('Failed to list gallery images', error);
         return [] as string[];
     });
-    const imagesData = shuffle(keys).slice(1, NUM_IMAGES).map((key) => { return { title: key, img: `${s3Url}/${key}` } });
+    const imagesData = shuffle(keys).slice(0, NUM_IMAGES).map((key) => { return { title: key, img: `${s3Url}/${key}` } });
     const session = await getServerSession(options);
     return imagesData.length > 0 && (
 
