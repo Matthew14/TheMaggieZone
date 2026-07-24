@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id    Int      @id @default(autoincrement())
-  title String
-  date  DateTime @default(now())
-}
-
 model ApplicationUser {
   id        Int     @id @default(autoincrement())
   username  String  @unique
@@ -21,18 +15,4 @@ model ApplicationUser {
   email     String  @unique
   isAdmin   Boolean @default(false)
   password  String
-  weights Weight[]
-}
-
-model Weight {
-  id         Int   @id @default(autoincrement())
-  addedBy    ApplicationUser  @relation(fields: [userId], references: [id])
-  userId     Int
-  amountInKg Float
-}
-
-model Image {
-  id         Int   @id @default(autoincrement())
-  title String
-  path String
 }
