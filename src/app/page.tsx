@@ -14,6 +14,11 @@ const BLUR_WIDTH = 16;
 // Bounds parallel downloads + sharp decodes on a cold cache; once every
 // photo's measurement is cached this loop is effectively free.
 const MEASURE_CONCURRENCY = 8;
+// On a cold cache, stop measuring new photos once this much time has been
+// spent and render what's ready. Measurements are cached permanently, so
+// later requests finish the remainder incrementally instead of one visitor
+// paying for the whole library (or timing out the function).
+const MEASURE_TIME_BUDGET_MS = 15_000;
 
 const shuffle = <T,>(items: T[]): T[] => {
     const result = [...items];
@@ -91,7 +96,12 @@ const Page: React.FC = async () => {
     });
     const shuffled = shuffle(blobs);
     const imagesData: imageWithTitle[] = [];
+    const deadline = Date.now() + MEASURE_TIME_BUDGET_MS;
     for (let i = 0; i < shuffled.length; i += MEASURE_CONCURRENCY) {
+        if (i > 0 && Date.now() > deadline) {
+            console.warn(`Measuring budget exhausted after ${i} of ${shuffled.length} photos`);
+            break;
+        }
         const batch = await Promise.all(
             shuffled.slice(i, i + MEASURE_CONCURRENCY).map(async (blob): Promise<imageWithTitle | null> => {
                 try {
