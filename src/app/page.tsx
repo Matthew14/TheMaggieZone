@@ -7,6 +7,7 @@ import { LoginButton, LogoutButton } from "./components/Buttons";
 import { getServerSession } from "next-auth";
 import { options } from "./api/auth/[...nextauth]/options";
 import { imageWithTitle } from "@/types";
+import { captionFor } from "@/lib/captions";
 import sharp from "sharp";
 
 const NUM_IMAGES = 10;
@@ -99,7 +100,7 @@ const Page: React.FC = async () => {
         shuffle(keys).slice(0, NUM_IMAGES).map(async (key): Promise<imageWithTitle | null> => {
             try {
                 const meta = await measureImage(key);
-                return { title: key, img: `${s3Url}/${encodeURI(key)}`, ...meta };
+                return { title: captionFor(key), img: `${s3Url}/${encodeURI(key)}`, ...meta };
             } catch (error) {
                 console.error(`Failed to measure gallery image ${key}`, error);
                 return null;
