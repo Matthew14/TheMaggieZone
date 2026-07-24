@@ -23,6 +23,9 @@ jobs:
         node-version: 22.x
         cache: 'npm'
     - run: npm ci
+    # next-env.d.ts is gitignored, so generate Next's ambient types
+    # (static image imports, route types) before type checking.
+    - run: npx next typegen
     - run: npx tsc --noEmit
 
   audit:
