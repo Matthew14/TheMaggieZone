@@ -3,7 +3,7 @@
 import { FC, useState } from "react";
 import Image from "next/image";
 import { imageWithTitle } from "@/types";
-import ImageModal from "./ImageModal";
+import ImageLightbox from "./ImageLightbox";
 
 
 interface MaggieImageListProps {
@@ -11,16 +11,16 @@ interface MaggieImageListProps {
 }
 
 const MaggieImageList: FC<MaggieImageListProps> = ({ images }) => {
-  const [selectedImage, setSelectedImage] = useState<imageWithTitle | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   return (
     <>
       <ul className='my-10 columns-2 md:columns-3 lg:columns-4 gap-2 list-none p-0'>
-        {images.map((item) => (
+        {images.map((item, i) => (
           <li key={item.img} className='mb-2 break-inside-avoid'>
             <button
               type='button'
               className='block w-full cursor-pointer border-0 bg-transparent p-0'
-              onClick={() => setSelectedImage(item)}
+              onClick={() => setSelectedIndex(i)}
               aria-label={`View ${item.title}`}
             >
               <Image
@@ -39,7 +39,12 @@ const MaggieImageList: FC<MaggieImageListProps> = ({ images }) => {
         ))}
       </ul>
 
-      <ImageModal image={selectedImage} onClose={() => setSelectedImage(null)} />
+      <ImageLightbox
+        images={images}
+        index={selectedIndex}
+        onClose={() => setSelectedIndex(null)}
+        onNavigate={setSelectedIndex}
+      />
 
     </>
   );
