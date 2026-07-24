@@ -10,12 +10,19 @@ interface MaggieImageListProps {
   images: imageWithTitle[];
 }
 
+const INITIAL_COUNT = 10;
+const BATCH_SIZE = 10;
+
 const MaggieImageList: FC<MaggieImageListProps> = ({ images }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
+  // The lightbox also only cycles through the revealed photos, so its
+  // counter matches what's on screen.
+  const visibleImages = images.slice(0, visibleCount);
   return (
     <>
       <ul className='my-10 columns-2 md:columns-3 lg:columns-4 gap-2 list-none p-0'>
-        {images.map((item, i) => (
+        {visibleImages.map((item, i) => (
           <li key={item.img} className='mb-2 break-inside-avoid'>
             <button
               type='button'
@@ -44,8 +51,20 @@ const MaggieImageList: FC<MaggieImageListProps> = ({ images }) => {
         ))}
       </ul>
 
+      {visibleCount < images.length && (
+        <div className='mb-10 flex justify-center'>
+          <button
+            type='button'
+            onClick={() => setVisibleCount((count) => count + BATCH_SIZE)}
+            className='cursor-pointer rounded-full bg-white/10 px-6 py-2 text-white transition hover:bg-white/20'
+          >
+            More Maggie
+          </button>
+        </div>
+      )}
+
       <ImageLightbox
-        images={images}
+        images={visibleImages}
         index={selectedIndex}
         onClose={() => setSelectedIndex(null)}
         onNavigate={setSelectedIndex}
