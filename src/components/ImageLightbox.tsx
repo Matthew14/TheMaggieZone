@@ -19,6 +19,8 @@ const buttonClasses =
 const ImageLightbox: FC<ImageLightboxProps> = ({ images, index, onClose, onNavigate }) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const image = index !== null ? images[index] : null;
+  // One display name feeds the caption, alt text and dialog label.
+  const caption = image?.title.replace(/\.[^.]+$/, "");
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -32,8 +34,16 @@ const ImageLightbox: FC<ImageLightboxProps> = ({ images, index, onClose, onNavig
     }
   }, [image]);
 
-  const showPrev = () => onNavigate((index! - 1 + images.length) % images.length);
-  const showNext = () => onNavigate((index! + 1) % images.length);
+  const showPrev = () => {
+    if (index !== null) {
+      onNavigate((index - 1 + images.length) % images.length);
+    }
+  };
+  const showNext = () => {
+    if (index !== null) {
+      onNavigate((index + 1) % images.length);
+    }
+  };
 
   return (
     <dialog
@@ -57,7 +67,7 @@ const ImageLightbox: FC<ImageLightboxProps> = ({ images, index, onClose, onNavig
           dialogRef.current?.close();
         }
       }}
-      aria-label={image?.title}
+      aria-label={caption}
       // The dark overlay lives on the full-screen dialog itself (rather than
       // ::backdrop) so a single opacity transition fades overlay and content
       // together via @starting-style.
@@ -65,26 +75,29 @@ const ImageLightbox: FC<ImageLightboxProps> = ({ images, index, onClose, onNavig
         justify-center bg-black/80 p-0 opacity-100 transition-opacity duration-300
         open:flex starting:opacity-0'
     >
-      {image && (
+      {index !== null && image && (
         <>
-          <figure className='flex max-h-full max-w-full flex-col items-center gap-3 p-4'>
+          {/* pointer-events-none lets clicks on the figure's padding fall
+              through to the dialog and close the lightbox; the image and
+              caption opt back in. */}
+          <figure className='pointer-events-none flex max-h-full max-w-full flex-col items-center gap-3 p-4'>
             {/* Remount per photo so each one fades in from its own blur placeholder. */}
             <Image
               key={image.img}
               src={image.img}
-              alt={image.title}
+              alt={caption ?? image.title}
               width={image.width}
               height={image.height}
               sizes='92vw'
               placeholder='blur'
               blurDataURL={image.blurDataURL}
-              className='max-h-[85dvh] max-w-[92vw] w-auto h-auto rounded-lg'
+              className='pointer-events-auto max-h-[85dvh] max-w-[92vw] w-auto h-auto rounded-lg'
             />
-            <figcaption className='text-sm text-white/80'>
-              {image.title.replace(/\.[^.]+$/, "")}
+            <figcaption className='pointer-events-auto text-sm text-white/80'>
+              {caption}
               {images.length > 1 && (
                 <span className='text-white/50'>
-                  {" "}&middot; {index! + 1} / {images.length}
+                  {" "}&middot; {index + 1} / {images.length}
                 </span>
               )}
             </figcaption>
