@@ -4,3 +4,13 @@ updates:
       directory: "/" # Location of package manifests
       schedule:
           interval: "weekly"
+      # One PR per week for patches, one for minors; majors stay individual.
+      groups:
+          patch-updates:
+              update-types: ["patch"]
+          minor-updates:
+              update-types: ["minor"]
+    - package-ecosystem: "github-actions"
+      directory: "/"
+      schedule:
+          interval: "weekly"

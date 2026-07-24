@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: 'npm'
+    - run: npm ci
+    - run: npx tsc --noEmit
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+    # GHSA-f88m-g3jw-g9cj is Next's internally bundled sharp 0.34.x
+    # (libvips CVEs): every current Next release pins it, and it is dead
+    # code on Vercel, where next/image optimization runs in the platform
+    # image service. Remove the allowlist entry once Next bundles sharp
+    # >= 0.35.
+    - run: npx audit-ci --high --allowlist GHSA-f88m-g3jw-g9cj
+
+  migration-check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+        - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: 'npm'
+    - run: npm ci
+    # A broken migration fails here, on an empty throwaway database,
+    # instead of against production.
+    - name: Apply all migrations to an empty database
+      run: npx prisma migrate deploy
+    # Fails if schema.prisma and the migration history disagree, which
+    # is how production drift starts.
+    - name: Check schema matches migration history
+      run: |
+        psql "$DATABASE_URL" -c 'CREATE DATABASE shadow;'
+        npx prisma migrate diff \
+          --from-migrations prisma/migrations \
+          --to-schema-datamodel prisma/schema.prisma \
+          --shadow-database-url postgresql://postgres:postgres@localhost:5432/shadow \
+          --exit-code
