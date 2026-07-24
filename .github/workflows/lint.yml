@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Use Node.js 24.x
+    - name: Use Node.js 22.x
       uses: actions/setup-node@v4
       with:
         # Matches the Vercel production runtime
-        node-version: 24.x
+        node-version: 22.x
         cache: 'npm'
     - run: npm ci
     - run: npm run lint
