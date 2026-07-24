@@ -26,8 +26,10 @@ const MaggieImageList: FC<MaggieImageListProps> = ({ images }) => {
               <Image
                 // will-change keeps each thumbnail on its own compositor
                 // layer: promoting one mid-hover inside the multi-column
-                // layout makes Chromium briefly blank the image.
-                className='w-full h-auto rounded-lg transition duration-200 will-change-transform hover:scale-[1.02] hover:shadow-lg'
+                // layout makes Chromium briefly blank the image. Scoped to
+                // mouse-like pointers so touch screens (where the effect
+                // never fires) don't pay for a GPU layer per thumbnail.
+                className='w-full h-auto rounded-lg transition duration-200 pointer-fine:will-change-transform hover:scale-[1.02] hover:shadow-lg'
                 src={item.img}
                 alt={item.title}
                 loading='lazy'
