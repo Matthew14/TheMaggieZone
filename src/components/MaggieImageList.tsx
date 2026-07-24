@@ -24,7 +24,10 @@ const MaggieImageList: FC<MaggieImageListProps> = ({ images }) => {
               aria-label={`View ${item.title}`}
             >
               <Image
-                className='w-full h-auto rounded-lg transition duration-200 hover:scale-[1.02] hover:shadow-lg'
+                // will-change keeps each thumbnail on its own compositor
+                // layer: promoting one mid-hover inside the multi-column
+                // layout makes Chromium briefly blank the image.
+                className='w-full h-auto rounded-lg transition duration-200 will-change-transform hover:scale-[1.02] hover:shadow-lg'
                 src={item.img}
                 alt={item.title}
                 loading='lazy'
