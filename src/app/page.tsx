@@ -10,8 +10,10 @@ import { imageWithTitle } from "@/types";
 import { captionFor } from "@/lib/captions";
 import sharp from "sharp";
 
-const NUM_IMAGES = 10;
 const BLUR_WIDTH = 16;
+// Bounds parallel downloads + sharp decodes on a cold cache; once every
+// photo's measurement is cached this loop is effectively free.
+const MEASURE_CONCURRENCY = 8;
 
 const shuffle = <T,>(items: T[]): T[] => {
     const result = [...items];
@@ -87,17 +89,22 @@ const Page: React.FC = async () => {
         console.error('Failed to list gallery images', error);
         return [] as GalleryBlob[];
     });
-    const imagesData = (await Promise.all(
-        shuffle(blobs).slice(0, NUM_IMAGES).map(async (blob): Promise<imageWithTitle | null> => {
-            try {
-                const meta = await measureImage(blob);
-                return { title: captionFor(blob.pathname), img: blob.url, ...meta };
-            } catch (error) {
-                console.error(`Failed to measure gallery image ${blob.pathname}`, error);
-                return null;
-            }
-        })
-    )).filter((image): image is imageWithTitle => image !== null);
+    const shuffled = shuffle(blobs);
+    const imagesData: imageWithTitle[] = [];
+    for (let i = 0; i < shuffled.length; i += MEASURE_CONCURRENCY) {
+        const batch = await Promise.all(
+            shuffled.slice(i, i + MEASURE_CONCURRENCY).map(async (blob): Promise<imageWithTitle | null> => {
+                try {
+                    const meta = await measureImage(blob);
+                    return { title: captionFor(blob.pathname), img: blob.url, ...meta };
+                } catch (error) {
+                    console.error(`Failed to measure gallery image ${blob.pathname}`, error);
+                    return null;
+                }
+            })
+        );
+        imagesData.push(...batch.filter((image): image is imageWithTitle => image !== null));
+    }
     const session = await getServerSession(options);
     return imagesData.length > 0 && (
 
