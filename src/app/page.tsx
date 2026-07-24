@@ -2,7 +2,7 @@ import { Inter } from "next/font/google";
 import { unstable_cache } from "next/cache";
 
 import MaggieImageList from "@/components/MaggieImageList";
-import { S3Client, paginateListObjectsV2 } from "@aws-sdk/client-s3";
+import { list } from "@vercel/blob";
 import { LoginButton, LogoutButton } from "./components/Buttons";
 import { getServerSession } from "next-auth";
 import { options } from "./api/auth/[...nextauth]/options";
@@ -22,56 +22,47 @@ const shuffle = <T,>(items: T[]): T[] => {
     return result;
 };
 const inter = Inter({ subsets: ["latin"] });
-const bucket = 'the-maggie-zone-images'
-const s3Url = `https://${bucket}.s3.eu-west-1.amazonaws.com`
 
-// The bucket policy grants public ListBucket/GetObject, so requests are
-// sent unsigned and the app needs no AWS credentials.
-const s3Client = new S3Client({
-    region: 'eu-west-1',
-    signer: { sign: async (request) => request },
-    credentials: { accessKeyId: '', secretAccessKey: '' },
-});
+type GalleryBlob = { pathname: string; url: string };
 
-const listImageKeys = unstable_cache(
-    async (): Promise<string[]> => {
-        const paginator = paginateListObjectsV2(
-            { client: s3Client },
-            { Bucket: bucket }
-        );
-        const keys: string[] = [];
-        for await (const page of paginator) {
-            for (const object of page.Contents ?? []) {
-                if (object.Key && !object.Key.endsWith('/')) {
-                    keys.push(object.Key);
+const listGalleryBlobs = unstable_cache(
+    async (): Promise<GalleryBlob[]> => {
+        const images: GalleryBlob[] = [];
+        let cursor: string | undefined;
+        do {
+            const page = await list({ cursor });
+            for (const blob of page.blobs) {
+                if (!blob.pathname.endsWith('/')) {
+                    images.push({ pathname: blob.pathname, url: blob.url });
                 }
             }
-        }
-        return keys;
+            cursor = page.hasMore ? page.cursor : undefined;
+        } while (cursor);
+        return images;
     },
-    ['s3-image-keys'],
-    { revalidate: 3600, tags: ['s3-image-keys'] }
+    ['blob-image-list'],
+    { revalidate: 3600, tags: ['blob-image-list'] }
 );
 
 // Measures a photo's real dimensions and builds a blur placeholder.
 // Photos are immutable (a new photo gets a new key), so entries are
 // cached without revalidation; each image is downloaded at most once
 // per deployment.
-const measureImage = (key: string) =>
+const measureImage = ({ pathname, url }: GalleryBlob) =>
     unstable_cache(
         async () => {
             // Fail fast on a stalled connection so the photo is dropped from
             // the render instead of hanging the whole page.
-            const response = await fetch(`${s3Url}/${encodeURI(key)}`, {
+            const response = await fetch(url, {
                 signal: AbortSignal.timeout(10_000),
             });
             if (!response.ok) {
-                throw new Error(`Fetching ${key} failed: ${response.status}`);
+                throw new Error(`Fetching ${pathname} failed: ${response.status}`);
             }
             const image = sharp(Buffer.from(await response.arrayBuffer()));
             const { width, height, orientation } = await image.metadata();
             if (!width || !height) {
-                throw new Error(`Could not read dimensions of ${key}`);
+                throw new Error(`Could not read dimensions of ${pathname}`);
             }
             // EXIF orientations 5-8 display rotated 90°, swapping the axes;
             // .rotate() bakes the same rotation into the placeholder.
@@ -83,26 +74,26 @@ const measureImage = (key: string) =>
                 blurDataURL: `data:image/jpeg;base64,${blur.toString('base64')}`,
             };
         },
-        ['image-meta', key],
+        ['image-meta', pathname],
         { revalidate: false }
     )();
 
 const Page: React.FC = async () => {
 
-    // Catch here rather than inside listImageKeys: unstable_cache doesn't
-    // cache rejections, so a transient S3 failure renders without the
+    // Catch here rather than inside listGalleryBlobs: unstable_cache doesn't
+    // cache rejections, so a transient Blob failure renders without the
     // gallery once instead of caching an empty list for an hour.
-    const keys = await listImageKeys().catch((error) => {
+    const blobs = await listGalleryBlobs().catch((error) => {
         console.error('Failed to list gallery images', error);
-        return [] as string[];
+        return [] as GalleryBlob[];
     });
     const imagesData = (await Promise.all(
-        shuffle(keys).slice(0, NUM_IMAGES).map(async (key): Promise<imageWithTitle | null> => {
+        shuffle(blobs).slice(0, NUM_IMAGES).map(async (blob): Promise<imageWithTitle | null> => {
             try {
-                const meta = await measureImage(key);
-                return { title: captionFor(key), img: `${s3Url}/${encodeURI(key)}`, ...meta };
+                const meta = await measureImage(blob);
+                return { title: captionFor(blob.pathname), img: blob.url, ...meta };
             } catch (error) {
-                console.error(`Failed to measure gallery image ${key}`, error);
+                console.error(`Failed to measure gallery image ${blob.pathname}`, error);
                 return null;
             }
         })

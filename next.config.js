@@ -6,7 +6,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'the-maggie-zone-images.s3.eu-west-1.amazonaws.com',
+        hostname: '*.public.blob.vercel-storage.com',
       },
     ],
   },
