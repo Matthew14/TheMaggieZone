@@ -5,15 +5,18 @@
   - You are about to drop the `Post` table. If the table is not empty, all the data it contains will be lost.
   - You are about to drop the `Weight` table. If the table is not empty, all the data it contains will be lost.
 
+  The production database has drifted from the migration history (the
+  Weight foreign key is missing there), so every statement is guarded
+  with IF EXISTS to drop whatever subset of these objects is present.
 */
 -- DropForeignKey
-ALTER TABLE "Weight" DROP CONSTRAINT "Weight_userId_fkey";
+ALTER TABLE IF EXISTS "Weight" DROP CONSTRAINT IF EXISTS "Weight_userId_fkey";
 
 -- DropTable
-DROP TABLE "Image";
+DROP TABLE IF EXISTS "Image";
 
 -- DropTable
-DROP TABLE "Post";
+DROP TABLE IF EXISTS "Post";
 
 -- DropTable
-DROP TABLE "Weight";
+DROP TABLE IF EXISTS "Weight";
