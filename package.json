@@ -17,18 +17,18 @@
     "@vercel/blob": "^2.6.1",
     "@vercel/speed-insights": "^2.0.0",
     "bcrypt": "^6.0.0",
-    "next": "^15.5.7",
-    "next-auth": "^4.24.11",
+    "next": "^15.5.21",
+    "next-auth": "^4.24.15",
     "react": "^19.2.0",
     "react-dom": "^19.2.7",
-    "sharp": "^0.34.4",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/node": "^24.9.1",
     "eslint": "^9.39.2",
-    "eslint-config-next": "^15.5.2",
+    "eslint-config-next": "^15.5.21",
     "prisma": "^6.19.3",
     "typescript": "^5.7.2"
   }
