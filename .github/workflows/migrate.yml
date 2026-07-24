@@ -1,0 +1,36 @@
+name: Migrate production database
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+    - 'prisma/migrations/**'
+    - 'prisma/schema.prisma'
+
+permissions:
+  contents: read
+
+# Serialize migration runs; never cancel one mid-flight.
+concurrency:
+  group: migrate-production
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: 'npm'
+    - run: npm ci
+    - name: Run migrations against production
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: |
+        if [ -z "$DATABASE_URL" ]; then
+          echo "::warning::DATABASE_URL secret not set; skipping migration deploy"
+          exit 0
+        fi
+        npx prisma migrate deploy
