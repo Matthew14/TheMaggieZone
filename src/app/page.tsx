@@ -96,8 +96,13 @@ const Page: React.FC = async () => {
     });
     const shuffled = shuffle(blobs);
     const imagesData: imageWithTitle[] = [];
+    // The time budget is impure by design: this page renders dynamically
+    // per request, so react-hooks/purity's idempotent-render assumption
+    // doesn't apply here.
+    // eslint-disable-next-line react-hooks/purity
     const deadline = Date.now() + MEASURE_TIME_BUDGET_MS;
     for (let i = 0; i < shuffled.length; i += MEASURE_CONCURRENCY) {
+        // eslint-disable-next-line react-hooks/purity
         if (i > 0 && Date.now() > deadline) {
             console.warn(`Measuring budget exhausted after ${i} of ${shuffled.length} photos`);
             break;
