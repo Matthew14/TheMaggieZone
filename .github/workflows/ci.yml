@@ -72,10 +72,11 @@ jobs:
     # Fails if schema.prisma and the migration history disagree, which
     # is how production drift starts.
     - name: Check schema matches migration history
+      env:
+        SHADOW_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/shadow
       run: |
         psql "$DATABASE_URL" -c 'CREATE DATABASE shadow;'
         npx prisma migrate diff \
           --from-migrations prisma/migrations \
-          --to-schema-datamodel prisma/schema.prisma \
-          --shadow-database-url postgresql://postgres:postgres@localhost:5432/shadow \
+          --to-schema prisma/schema.prisma \
           --exit-code

@@ -1,10 +1,14 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "./generated"
+  // Extensionless imports: the generated .ts files are compiled by
+  // Next's bundler, which cannot resolve the default ESM-style ".js"
+  // import specifiers back to their .ts sources.
+  importFileExtension = ""
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model ApplicationUser {
