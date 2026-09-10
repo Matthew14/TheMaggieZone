@@ -9,17 +9,17 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.9.1",
-    "@prisma/client": "^7.9.1",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "19.2.4",
     "@vercel/analytics": "^2.0.1",
-    "@vercel/blob": "^2.6.1",
+    "@vercel/blob": "^2.8.0",
     "@vercel/speed-insights": "^2.0.0",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.4.2",
-    "next": "^16.2.12",
+    "next": "^16.3.4",
     "next-auth": "^4.24.15",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -28,10 +28,10 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.4.1",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^16.2.12",
-    "prisma": "^7.9.1",
+    "eslint-config-next": "^16.3.4",
+    "prisma": "^7.10.0",
     "typescript": "^5.7.2"
   },
   "overrides": {
